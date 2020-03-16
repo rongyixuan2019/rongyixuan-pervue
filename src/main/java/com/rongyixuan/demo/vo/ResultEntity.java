@@ -34,4 +34,8 @@ public class ResultEntity implements Serializable {
     public static ResultEntity error(){
         return new ResultEntity("error",10002,null);
     }
+
+    public static ResultEntity error(Integer code,Object result){
+        return new ResultEntity("error",code,result);
+    }
 }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rongyixuan.demo.mapper.HouseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rongyixuan.demo.entity.House">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="province" property="province" />
+        <result column="city" property="city" />
+        <result column="district" property="district" />
+        <result column="community" property="community" />
+        <result column="room" property="room" />
+        <result column="hall" property="hall" />
+        <result column="toilet" property="toilet" />
+        <result column="orientation" property="orientation" />
+        <result column="decorate" property="decorate"/>
+        <result column="rent" property="rent" />
+        <result column="pic" property="pic" />
+        <result column="introduction" property="introduction" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, province, city, district, community, room, hall, toilet, orientation, decorate, rent, pic, introduction
+    </sql>
+
+    <select id="selectPageVo" resultMap="BaseResultMap">
+        SELECT
+        u.*, p.province provinceName,
+        IF (
+        c.city = '',
+        p.province,
+        c.city
+        ) cityName,
+        IF (
+        d.district = '',
+        c.city,
+        d.district
+        ) districtName,
+        GROUP_CONCAT(r.id)rids,
+        GROUP_CONCAT(r.`name`)rnames,
+        GROUP_CONCAT(r.nameZh)rnameZhs
+        FROM
+        t_house u
+        LEFT JOIN nation p ON u.province = p.id
+        LEFT JOIN nation c ON u.city = c.id
+        LEFT JOIN nation d ON u.district = d.id
+        LEFT JOIN user_role ur on u.id=ur.uid
+        LEFT JOIN role r on ur.rid=r.id
+        <where>
+            <if test="userVo!=null">
+                <if test="userVo.phone!=null and userVo.phone!=''">
+                    and u.phone=#{userVo.phone}
+                </if>
+                <if test="userVo.name!=null and userVo.name!=''">
+                    and u.name like concat('%',#{userVo.name},'%')
+                </if>
+            </if>
+        </where>
+        GROUP BY u.id
+    </select>
+
+</mapper>

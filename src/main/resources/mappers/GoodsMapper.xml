@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rongyixuan.demo.mapper.GoodsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rongyixuan.demo.entity.Goods">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="picurl" property="picurl" />
+        <result column="price" property="price" />
+        <result column="province" property="province" />
+        <result column="city" property="city" />
+        <result column="district" property="district" />
+        <result column="createdtime" property="createdtime" />
+    </resultMap>
+
+    <resultMap id="voMap" type="com.rongyixuan.demo.vo.GoodsVo" extends="BaseResultMap">
+        <result column="provinceName" property="provinceName"></result>
+        <result column="cityName" property="cityName"></result>
+        <result column="districtName" property="districtName"></result>
+        <result property="tnames" column="tnames"></result>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, picurl, price, province, city, district, createdtime
+    </sql>
+    <select id="selectVos" resultMap="voMap">
+        SELECT
+	    g.*, p.province provinceName,
+        IF (c.city = '',p.province,c.city) cityName,
+        IF (d.district = '',c.city,d.district) districtName,
+        GROUP_CONCAT(t.id) tids,
+        GROUP_CONCAT(t.`name` separator '/') tnames
+        FROM goods g
+        LEFT JOIN nation p ON g.province = p.id
+        LEFT JOIN nation c ON g.city = c.id
+        LEFT JOIN nation d ON g.district = d.id
+        LEFT JOIN goods_type gt ON g.id = gt.gid
+        LEFT JOIN gtype t ON gt.tid = t.id
+        <where>
+            <if test="goodsVo.name!=null and goodsVo.name!=''">
+                g.name like concat('%',#{goodsVo.name},'%')
+            </if>
+            <if test="goodsVo.p1!=null and goodsVo.p1!=''">
+                and g.price >= #{goodsVo.p1}
+            </if>
+            <if test="goodsVo.p2!=null and goodsVo.p2!=''">
+                and g.price &lt;= #{goodsVo.p2}
+            </if>
+        </where>
+        GROUP BY
+	    g.id
+    </select>
+
+
+</mapper>

@@ -1,6 +1,8 @@
 package com.rongyixuan.demo.controller;
 
 
+import com.rongyixuan.demo.entity.Menu;
+import com.rongyixuan.demo.entity.User;
 import com.rongyixuan.demo.mapper.MenuMapper;
 import com.rongyixuan.demo.service.IMenuService;
 import com.rongyixuan.demo.vo.ResultEntity;
@@ -11,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -32,8 +37,14 @@ public class MenuController {
     }
 
     @RequestMapping("/listMenuByUserName")
-    public ResultEntity listMenuByUserName(@RequestParam(defaultValue = "lisi") String userName){
-        return ResultEntity.ok(iMenuService.listMenuByUserName(userName));
+    public ResultEntity listMenuByUserName(HttpServletRequest request){
+       //获取session中的值
+        User user = (User) request.getSession().getAttribute("user");
+        if(user!=null){
+            return ResultEntity.ok(iMenuService.listMenuByUserName(user.getUsername()));
+        }else{
+            return ResultEntity.ok(new ArrayList<Menu>());
+        }
     }
 
 }
